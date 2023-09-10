@@ -1,0 +1,28 @@
+---
+- name: Hello SJSU Playbook
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Ensure Python3 is Installed
+      apt:
+        name: python3
+        state: present
+
+    - name: Ensure Webserver Directory Exists
+      file:
+        path: /var/www
+        state: directory
+
+    - name: Deploy Hello World Web Page
+      copy:
+        content: "Hello World from SJSU - {{ inventory_hostname }} ({{ hostvars[inventory_hostname]['ansible_host'] }})"
+        dest: /var/www/index.html
+
+    - name: Check if Webserver is Running
+      stat:
+        path: /var/run/http.server.pid
+      register: pid_file
+
+    - name: Start Webserver if Not Running
+      command: python3 -m http.server 8080 --bind 0.0.0.0 --directory /var/www/
+      when: not pid_file.stat.exists

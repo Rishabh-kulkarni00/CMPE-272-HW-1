@@ -1,0 +1,12 @@
+---
+- name: Stop server execution and kill running instances
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Kill any running python server instance
+      command: pkill -f "python3 -m http.server"
+      ignore_errors: yes
+    - name: Delete the http.server.pid file
+      file:
+        path: /var/run/http.server.pid
+        state: absent
